@@ -39,6 +39,9 @@ data = data.dropna()
 # Bin DPQ100 into categorical classes
 data['DPQ100_cat'] = pd.cut(data['DPQ100'], bins=[-1, 0, 1, 2, 3], labels=['None', 'Low', 'Moderate', 'High'])
 
+cleaned_csv_path = r'C:\Users\matth\Downloads\Cleaned_DPQ_L.csv'
+data.to_csv(cleaned_csv_path, index=False)
+
 # Exploratory Data Analysis
 # Plot distribution of "Feeling down, depressed, or hopeless" (DPQ020)
 sns.histplot(data['DPQ020'], kde=True)
@@ -95,7 +98,7 @@ y_pred = model.predict(X_test)
 print("Accuracy:", accuracy_score(y_test, y_pred))
 print("Classification Report:\n", classification_report(y_test, y_pred))
 
-# Step 15: Feature Importance Plot
+# Feature Importance Plot
 feature_importances = pd.Series(model.feature_importances_, index=X_train.columns)
 feature_importances.nlargest(10).plot(kind='barh')
 plt.title("Top Features in Predicting Difficulty Due to Mental Health Symptoms (DPQ100)")
