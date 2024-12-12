@@ -35,6 +35,11 @@ data = data[selected_columns]
 
 # Data Cleaning
 data = data.dropna()
+# Change values to 0
+data = data.applymap(lambda x: 0 if isinstance(x, (float, int)) and abs(x) < 1e-10 else x)
+# Cap all values at 3
+dpq_columns = [col for col in data.columns if col.startswith('DPQ') and col != 'DPQ100_cat']
+data[dpq_columns] = data[dpq_columns].applymap(lambda x: min(x, 3) if isinstance(x, (float, int)) else x)
 
 # Bin DPQ100 into categorical classes
 data['DPQ100_cat'] = pd.cut(data['DPQ100'], bins=[-1, 0, 1, 2, 3], labels=['None', 'Low', 'Moderate', 'High'])
@@ -62,15 +67,6 @@ y = data['DPQ100_cat']  # Target variable as categorical
 # Train-Test Split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Check for missing values
-print("Missing values in X_train:\n", X_train.isnull().sum())
-print("Missing values in X_test:\n", X_test.isnull().sum())
-
-# Handle missing values
-# Option 1: Drop rows with missing values
-# X_train = X_train.dropna()
-# X_test = X_test.dropna()
-
 # Fill missing values with the mean
 X_train = X_train.fillna(X_train.mean())
 X_test = X_test.fillna(X_test.mean())
@@ -79,15 +75,10 @@ X_test = X_test.fillna(X_test.mean())
 y_train = y_train.dropna()
 y_test = y_test.dropna()
 
-# Ensure consistent lengths
 # Align X_train and y_train
 X_train, y_train = X_train.align(y_train, join='inner', axis=0)
 # Align X_test and y_test
 X_test, y_test = X_test.align(y_test, join='inner', axis=0)
-
-# Verify the lengths
-print(f"Length of X_train: {len(X_train)}, Length of y_train: {len(y_train)}")
-print(f"Length of X_test: {len(X_test)}, Length of y_test: {len(y_test)}")
 
 # Build and Train Random Forest Classifier
 model = RandomForestClassifier(random_state=42)
